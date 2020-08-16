@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: umbrella
+  namespace: dev
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: dev
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: apps/umbrella
+    repoURL: https://gitlab.com/olympiu/kube-infra
+    targetRevision: HEAD
+    directory:
+      recurse: true
+      jsonnet: {}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

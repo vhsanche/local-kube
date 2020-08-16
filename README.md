@@ -1,3 +1,12 @@
+# To Install
+```bash
+./infra install
+```
+# To Delete
+```bash
+./infra delete
+```
+
 Pre-requesites
 ==============
 To install kind do the following:
@@ -18,6 +27,8 @@ On Mac
 ```bash
 brew install kind
 brew install helm
+brew tap argoproj/tap
+brew install argoproj/tap/argocd
 ```
 To give Docker enough computer resources do the following:
 ```bash

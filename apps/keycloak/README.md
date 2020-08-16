@@ -15,7 +15,7 @@ metadata:
     ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - host: sso.test.com
+  - host: sso.olympiu.com
     http:
       paths:
       - path: /
@@ -31,7 +31,7 @@ Post Configuration
 ==================
 Need to update your /etc/hosts file with the following:
 ```bash
-127.0.0.1   localhost sso.test.com
+127.0.0.1   localhost sso.olympiu.com
 ```
 
 References

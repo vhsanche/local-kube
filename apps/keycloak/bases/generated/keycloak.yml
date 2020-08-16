@@ -1,0 +1,441 @@
+---
+# Source: keycloak/templates/secret-db.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-db
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  password: "a2V5Y2xvYWs="
+  username: "a2V5Y2xvYWs="
+---
+# Source: keycloak/templates/secret-keycloak.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-http
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  password: "a2V5Y2xvYWs="
+---
+# Source: keycloak/templates/configmap-sh.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-sh
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  keycloak.sh: |
+    #!/usr/bin/env bash
+
+    set -o errexit
+    set -o nounset
+
+    exec /opt/jboss/tools/docker-entrypoint.sh -b 0.0.0.0  -c standalone.xml
+---
+# Source: keycloak/templates/configmap-startup.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-startup
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  keycloak.cli: |
+    embed-server --std-out=echo
+    batch
+    ## Sets the node identifier to the node name (= pod name). Node identifiers have to be unique. They can have a
+    ## maximum length of 23 characters. Thus, the chart's fullname template truncates its length accordingly.
+    /subsystem=transactions:write-attribute(name=node-identifier, value=${jboss.node.name})
+    
+    
+    # Allow log level to be configured via environment variable
+    /subsystem=logging/console-handler=CONSOLE:write-attribute(name=level, value=${env.WILDFLY_LOGLEVEL:INFO})
+    /subsystem=logging/root-logger=ROOT:write-attribute(name=level, value=${env.WILDFLY_LOGLEVEL:INFO})
+    
+    # Add dedicated eventsListener config element to allow configuring elements.
+    /subsystem=keycloak-server/spi=eventsListener:add()
+    /subsystem=keycloak-server/spi=eventsListener/provider=jboss-logging:add(enabled=true)
+    
+    # Propagate success events to INFO instead of DEBUG, to expose successful logins for log analysis
+    /subsystem=keycloak-server/spi=eventsListener/provider=jboss-logging:write-attribute(name=properties.success-level,value=info)
+    /subsystem=keycloak-server/spi=eventsListener/provider=jboss-logging:write-attribute(name=properties.error-level,value=warn)
+    
+    
+    # Configure datasource to use explicit query timeout in seconds
+    /subsystem=datasources/data-source=KeycloakDS/:write-attribute(name=query-timeout,value=${env.DB_QUERY_TIMEOUT:300})
+    
+    # Configure datasource to connection before use
+    /subsystem=datasources/data-source=KeycloakDS/:write-attribute(name=validate-on-match,value=${env.DB_VALIDATE_ON_MATCH:true})
+    
+    # Configure datasource to try all other connections before failing
+    /subsystem=datasources/data-source=KeycloakDS/:write-attribute(name=use-fast-fail,value=${env.DB_USE_CAST_FAIL:false})
+    
+    
+
+    run-batch
+    stop-embedded-server
+---
+# Source: keycloak/templates/test/configmap-test.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-test
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  test.py: |
+    import os
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions
+    from urllib.parse import urlparse
+
+    print('Creating PhantomJS driver...')
+    driver = webdriver.PhantomJS(service_log_path='/tmp/ghostdriver.log')
+
+    base_url = 'http://keycloak-http'
+
+    print('Opening Keycloak...')
+    driver.get('{0}/auth/admin/'.format(base_url))
+
+    username = os.environ['KEYCLOAK_USER']
+    password = os.environ['KEYCLOAK_PASSWORD']
+
+    username_input = WebDriverWait(driver, 30).until(expected_conditions.presence_of_element_located((By.ID, "username")))
+    password_input = WebDriverWait(driver, 30).until(expected_conditions.presence_of_element_located((By.ID, "password")))
+    login_button = WebDriverWait(driver, 30).until(expected_conditions.presence_of_element_located((By.ID, "kc-login")))
+
+    print('Entering username...')
+    username_input.send_keys(username)
+
+    print('Entering password...')
+    password_input.send_keys(password)
+
+    print('Clicking login button...')
+    login_button.click()
+
+    current_url = urlparse(driver.current_url)
+    expected_url = urlparse('{0}/auth/admin/master/console/'.format(base_url))
+
+    print('Current URL: {0}'.format(current_url))
+    print('Expected URL: {0}'.format(expected_url))
+
+    if current_url.path != expected_url.path:
+        print('Login failed. Current url is not expected url')
+        exit(1)
+
+    print('URLs match. Login successful.')
+
+    driver.quit()
+---
+# Source: keycloak/templates/service-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-headless
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+    service: headless
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: https
+      port: 8443
+      targetPort: https
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+---
+# Source: keycloak/templates/service-http.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-http
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+    service: http
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: https
+      port: 8443
+      targetPort: https
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+---
+# Source: keycloak/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: keycloak
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: keycloak
+      app.kubernetes.io/instance: "keycloak"
+  replicas: 1
+  serviceName: keycloak-headless
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: keycloak
+        app.kubernetes.io/instance: "keycloak"
+      annotations:
+        checksum/config-sh: 093c710447efcc1d6a094cc937e6f4b14bef1a692beeb8179b62eafe746a70b9
+        checksum/config-startup: 475d37792ffe81604ec9b43d698e5d501aa7ecc0b92b007e542bff25146d1d35
+    spec:
+      restartPolicy: Always
+      serviceAccountName: default
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: keycloak
+          image: "docker.io/jboss/keycloak:10.0.0"
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+          command:
+            - /scripts/keycloak.sh
+          lifecycle:
+            # postStart:
+            #   exec:
+            #     command: ["/bin/sh", "-c", "ls"]
+            
+          env:
+            - name: KEYCLOAK_USER
+              value: admin
+            - name: KEYCLOAK_PASSWORD_FILE
+              value: /secrets/password
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=50.0"
+            - name: PROXY_ADDRESS_FORWARDING
+              value: "true"
+            
+            - name: DB_VENDOR
+              value: "postgres"
+            - name: DB_ADDR
+              value: "keycloak-postgresql"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_DATABASE
+              value: "keycloak"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db
+                  key: "username"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-db
+                  key: "password"
+            # - name: KEYCLOAK_LOGLEVEL
+            #   value: DEBUG
+            # - name: WILDFLY_LOGLEVEL
+            #   value: DEBUG
+            # - name: CACHE_OWNERS
+            #   value: "2"
+            # - name: DB_QUERY_TIMEOUT
+            #   value: "60"
+            # - name: DB_VALIDATE_ON_MATCH
+            #   value: true
+            # - name: DB_USE_CAST_FAIL
+            #   value: false
+            
+          volumeMounts:
+            - name: sh
+              mountPath: /scripts
+              readOnly: true
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
+            - name: startup
+              mountPath: /opt/jboss/startup-scripts
+              readOnly: true
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /auth/
+              port: http
+            initialDelaySeconds: 300
+            timeoutSeconds: 5
+            
+          readinessProbe:
+            httpGet:
+              path: /auth/realms/master
+              port: http
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            
+          resources:
+            {}
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: keycloak
+                  app.kubernetes.io/instance: "keycloak"
+                matchExpressions:
+                  - key: role
+                    operator: NotIn
+                    values:
+                      - test
+              topologyKey: kubernetes.io/hostname
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: keycloak
+                    app.kubernetes.io/instance: "keycloak"
+                  matchExpressions:
+                    - key: role
+                      operator: NotIn
+                      values:
+                        - test
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+        
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: sh
+          configMap:
+            name: keycloak-sh
+            defaultMode: 0555
+        - name: secrets
+          secret:
+            secretName: keycloak-http
+        - name: startup
+          configMap:
+            name: keycloak-startup
+            defaultMode: 0555
+---
+# Source: keycloak/templates/test/pod-test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "keycloak-test-aew9i"
+  labels:
+    helm.sh/chart: keycloak-8.2.2
+    app.kubernetes.io/name: keycloak
+    app.kubernetes.io/instance: "keycloak"
+    app.kubernetes.io/version: "10.0.0"
+    app.kubernetes.io/managed-by: Helm
+    role: test
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  securityContext:
+    fsGroup: 1000
+  containers:
+    - name: keycloak-test
+      image: "unguiculus/docker-python3-phantomjs-selenium:v1"
+      imagePullPolicy: IfNotPresent
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      command:
+        - python3
+        - /tests/test.py
+      env:
+        - name: KEYCLOAK_USER
+          value: admin
+        - name: KEYCLOAK_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: keycloak-http
+              key: password
+      volumeMounts:
+        - name: tests
+          mountPath: /tests
+  volumes:
+    - name: tests
+      configMap:
+        name: keycloak-test
+  restartPolicy: Never
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: keycloak-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+    - sso.olympiu.com
+  rules:
+  - host: sso.olympiu.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: keycloak-http
+          servicePort: 80
+      - path: /auth
+        backend:
+          serviceName: keycloak-http
+          servicePort: 80
