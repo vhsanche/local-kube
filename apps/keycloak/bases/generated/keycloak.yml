@@ -426,9 +426,9 @@ metadata:
 spec:
   tls:
   - hosts:
-    - sso.olympiu.com
+    - sso.test-test.com
   rules:
-  - host: sso.olympiu.com
+  - host: sso.test-test.com
     http:
       paths:
       - path: /

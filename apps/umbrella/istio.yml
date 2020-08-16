@@ -14,7 +14,7 @@ spec:
   project: default
   source:
     path: apps/istio/dev
-    repoURL: https://gitlab.com/olympiu/kube-infra
+    repoURL: https://gitub.com/vhsanche/kube
     targetRevision: HEAD
   syncPolicy:
     automated:

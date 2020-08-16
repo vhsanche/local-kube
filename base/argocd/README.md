@@ -11,7 +11,7 @@ Post Configuration
 ==================
 Need to update your /etc/hosts file with the following:
 ```bash
-127.0.0.1   localhost sso.olympiu.com argocd.olympiu.com
+127.0.0.1   localhost sso.test-test.com argocd.test-test.com
 ```
 
 References

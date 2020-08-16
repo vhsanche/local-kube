@@ -11,9 +11,9 @@
     spec:
       tls:
       - hosts:
-        - dev-argocd.olympiu.com
+        - argocd.test-test.com
       rules:
-      - host: dev-argocd.olympiu.com
+      - host: argocd.test-test.com
         http:
           paths:
           - backend:

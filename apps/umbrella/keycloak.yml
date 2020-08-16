@@ -14,7 +14,7 @@ spec:
   project: default
   source:
     path: apps/keycloak/dev
-    repoURL: https://gitlab.com/olympiu/kube-infra
+    repoURL: https://gitub.com/vhsanche/kube
     targetRevision: HEAD
   syncPolicy:
     automated:

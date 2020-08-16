@@ -14,7 +14,7 @@ spec:
   project: default
   source:
     path: apps/postgresql/dev
-    repoURL: https://gitlab.com/olympiu/kube-infra
+    repoURL: https://gitlab.com/olympiu/kube
     targetRevision: HEAD
   syncPolicy:
     automated:

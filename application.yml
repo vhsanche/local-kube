@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     path: apps/umbrella
-    repoURL: https://gitlab.com/olympiu/kube-infra
+    repoURL: https://gitub.com/vhsanche/kube
     targetRevision: HEAD
     directory:
       recurse: true
