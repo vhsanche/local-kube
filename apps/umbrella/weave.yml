@@ -9,7 +9,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "1"
 spec:
   destination:
-    namespace: dev
+    namespace: weave
     server: https://kubernetes.default.svc
   project: default
   source:
