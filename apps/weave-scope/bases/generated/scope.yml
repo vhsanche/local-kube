@@ -4,7 +4,7 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   labels:    
-    chart: weave-scope-cluster-agent-1.1.8
+    chart: weave-scope-cluster-agent-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -28,7 +28,7 @@ kind: ConfigMap
 metadata:
   name: weave-scope-scope-tests
   labels:    
-    chart: weave-scope-1.1.8
+    chart: weave-scope-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -36,7 +36,7 @@ data:
   run.sh: |-
 
     @test "Testing Weave Scope UI is accessible" {
-      curl --retry 12 --retry-delay 10 http://scope-weave-scope.weave-scope.svc:80
+      curl --retry 12 --retry-delay 10 http://scope-weave-scope.weave.svc:80
     }
 ---
 # Source: weave-scope/charts/weave-scope-cluster-agent/templates/clusterrole.yaml
@@ -44,7 +44,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
   labels:    
-    chart: weave-scope-cluster-agent-1.1.8
+    chart: weave-scope-cluster-agent-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -78,7 +78,7 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   labels:    
-    chart: weave-scope-cluster-agent-1.1.8
+    chart: weave-scope-cluster-agent-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -102,14 +102,14 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: weave-scope-cluster-agent-scope
-    namespace: weave-scope
+    namespace: weave
 ---
 # Source: weave-scope/charts/weave-scope-frontend/templates/service.yaml
 apiVersion: v1
 kind: Service
 metadata:
   labels:    
-    chart: weave-scope-frontend-1.1.8
+    chart: weave-scope-frontend-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -143,7 +143,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   labels:    
-    chart: weave-scope-agent-1.1.8
+    chart: weave-scope-agent-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -171,7 +171,7 @@ spec:
   template:
     metadata:
       labels:        
-        chart: weave-scope-agent-1.1.8
+        chart: weave-scope-agent-1.1.10
         heritage: Helm
         release: scope
         app: weave-scope
@@ -192,7 +192,7 @@ spec:
             - '--probe.docker=true'
             - '--probe.kubernetes=true'
             
-            - scope-weave-scope.weave-scope.svc:80
+            - scope-weave-scope.weave.svc:80
           securityContext:
             privileged: true
           resources:
@@ -223,7 +223,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:    
-    chart: weave-scope-cluster-agent-1.1.8
+    chart: weave-scope-cluster-agent-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -251,7 +251,7 @@ spec:
   template:
     metadata:
       labels:        
-        chart: weave-scope-cluster-agent-1.1.8
+        chart: weave-scope-cluster-agent-1.1.10
         heritage: Helm
         release: scope
         app: weave-scope
@@ -266,7 +266,7 @@ spec:
             - '--probe-only'
             - '--probe.kubernetes.role=cluster'
             
-            - scope-weave-scope.weave-scope.svc:80
+            - scope-weave-scope.weave.svc:80
           resources:
             null
       serviceAccountName: weave-scope-cluster-agent-scope
@@ -276,7 +276,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:    
-    chart: weave-scope-frontend-1.1.8
+    chart: weave-scope-frontend-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
@@ -303,7 +303,7 @@ spec:
   template:
     metadata:
       labels:        
-        chart: weave-scope-frontend-1.1.8
+        chart: weave-scope-frontend-1.1.10
         heritage: Helm
         release: scope
         app: weave-scope
@@ -326,11 +326,11 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "scope-ui-test-5emgx"
+  name: "scope-ui-test-mtcw9"
   annotations:
     "helm.sh/hook": test-success
   labels:    
-    chart: weave-scope-1.1.8
+    chart: weave-scope-1.1.10
     heritage: Helm
     release: scope
     app: weave-scope
