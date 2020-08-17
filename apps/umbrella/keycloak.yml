@@ -14,7 +14,7 @@ spec:
   project: default
   source:
     path: apps/keycloak/dev
-    repoURL: https://gitub.com/vhsanche/kube
+    repoURL: https://github.com/vhsanche/kube.git
     targetRevision: HEAD
   syncPolicy:
     automated:
