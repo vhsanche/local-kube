@@ -25,6 +25,7 @@ function install() {
     kubectl patch secret -n dev argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
 
     # configure app for apps
+    kubectl apply -f application.yml
     
 }
 
