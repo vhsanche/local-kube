@@ -1,5 +1,5 @@
 # Local registry
-This K8s cluster has local registry support. Tag your image as localhost:5000/<image_name> and push as follows:
+This K8s cluster has local registry support. Tag your image as localhost:5000/<image_name> and push it as follows:
 ```bash
 docker push localhost:5000/<image_name>
 ```
