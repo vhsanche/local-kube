@@ -1,10 +1,21 @@
-# To Install
+# Local registry
+This K8s cluster has local registry support. Tag your image as localhost:5000/<image_name> and push as follows:
 ```bash
-./infra install
+docker push localhost:5000/<image_name>
 ```
-# To Delete
+
+# To install a basic K8s cluster with ingress
 ```bash
-./infra delete
+./infra.sh basic
+```
+
+# To install a K8s cluster with ArgoCD
+```bash
+./infra.sh install
+```
+# To delete
+```bash
+./infra.sh delete
 ```
 
 Pre-requesites
