@@ -64,7 +64,9 @@ function basic() {
     local_registry
     create_cluster
     post_local_registry
+}
 
+function install_ingress() {
     # install ingress controller
     kubectl create namespace ingress-nginx
     kubectl apply -n ingress-nginx -f base/ingress/mandatory.yaml
@@ -75,6 +77,7 @@ function basic() {
 function install() {
     # install basic kind cluster
     basic
+    install_ingress
 
     # install psp
     kubectl apply -f base/policy/restricted-psp.yml
@@ -116,6 +119,9 @@ case $CMD in
     basic)
         basic
         ;;
+    install-ingress)
+        install_ingress
+        ;;
     install)
         install
         ;;
@@ -123,6 +129,6 @@ case $CMD in
         delete
         ;;
     *)
-        echo "Options are to basic, install and delete only."
+        echo "Options are to basic, install-ingress, install and delete only."
         ;;
 esac
