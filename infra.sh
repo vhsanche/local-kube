@@ -1,7 +1,6 @@
 #!/bin/bash
 reg_name='kind-registry'
 reg_port='5000'
-reg_host="${reg_name}"
 
 function local_registry() {
     # create registry container unless it already exists
@@ -12,9 +11,6 @@ function local_registry() {
         -d --restart=always -p "127.0.0.1:${reg_port}:5000" --name "${reg_name}" \
         registry:2
     fi
-
-    reg_host="$(docker inspect -f '{{.NetworkSettings.IPAddress}}' "${reg_name}")"
-    echo "Registry Host: ${reg_host}"
 }
 
 function post_local_registry() {
@@ -39,7 +35,7 @@ apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
 - |-
   [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:${reg_port}"]
-    endpoint = ["http://${reg_host}:5000"]
+    endpoint = ["http://${reg_name}:${reg_port}"]
 nodes:
 - role: control-plane
   kubeadmConfigPatches:
@@ -60,6 +56,7 @@ nodes:
 - role: worker
 EOF
     kubectl cluster-info --context kind-kind
+    docker network connect "kind" "${reg_name}" || true
 }
 
 function basic() {
