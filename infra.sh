@@ -1,8 +1,9 @@
 #!/bin/bash
 reg_name='kind-registry'
 reg_port='5000'
+cluster_name='my-cluster'
 
-function local_registry() {
+function kind_local_registry() {
     # create registry container unless it already exists
 
     running="$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)"
@@ -13,7 +14,7 @@ function local_registry() {
     fi
 }
 
-function post_local_registry() {
+function kind_post_local_registry() {
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
 kind: ConfigMap
@@ -27,7 +28,7 @@ data:
 EOF
 }
 
-function create_cluster() {
+function kind_create_cluster() {
     # create a cluster with the local registry enabled in containerd
 cat <<EOF | kind create cluster --config=-
 kind: Cluster
@@ -59,74 +60,114 @@ EOF
     docker network connect "kind" "${reg_name}" || true
 }
 
-function basic() {
+function kind_basic() {
     # create local registry
-    local_registry
-    create_cluster
-    post_local_registry
+    kind_local_registry
+    kind_create_cluster
+    kind_post_local_registry
 }
 
-function install_ingress() {
+function kind_install() {
+    # install basic kind cluster
+    kind_basic
+    kind_install_ingress
+    install_argocd
+}
+
+function kind_delete () {
+    kind delete cluster || true
+    docker rm -f kind-registry || true
+}
+
+function kind_install_ingress() {
     # install ingress controller
     kubectl create namespace ingress-nginx
-    kubectl apply -n ingress-nginx -f base/ingress/mandatory.yaml
+    kubectl apply -n ingress-nginx -f core/ingress/mandatory.yaml
     kubectl apply -n ingress-nginx -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.27.0/deploy/static/provider/baremetal/service-nodeport.yaml
     kubectl patch deployments -n ingress-nginx nginx-ingress-controller -p '{"spec":{"template":{"spec":{"containers":[{"name":"nginx-ingress-controller","ports":[{"containerPort":80,"hostPort":80},{"containerPort":443,"hostPort":443}]}],"nodeSelector":{"ingress-ready":"true"},"tolerations":[{"key":"node-role.kubernetes.io/master","operator":"Equal","effect":"NoSchedule"}]}}}}' 
 }
 
-function install() {
-    # install basic kind cluster
-    basic
-    install_ingress
-
-    # install psp
-    kubectl apply -f base/policy/restricted-psp.yml
-
+function install_argocd() {
     # install argocd
-    kubectl create namespace dev
-    kubectl apply -k base/argocd/dev
+    kubectl create namespace argocd
+    kubectl apply -k argocd/apps/argocd/dev
 
     # wait for argocd
-    kubectl rollout status deployment argocd-application-controller -n dev
-    kubectl rollout status deployment argocd-dex-server -n dev
-    kubectl rollout status deployment argocd-redis -n dev 
-    kubectl rollout status deployment argocd-repo-server -n dev
-    kubectl rollout status deployment argocd-server -n dev
-    kubectl patch secret -n dev argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
+    kubectl rollout status deployment argocd-application-controller -n argocd
+    kubectl rollout status deployment argocd-dex-server -n argocd
+    kubectl rollout status deployment argocd-redis -n argocd 
+    kubectl rollout status deployment argocd-repo-server -n argocd
+    kubectl rollout status deployment argocd-server -n argocd
+    kubectl patch secret -n argocd argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
 
     # configure app for apps
-    kubectl apply -f application.yml
+    kubectl apply -f argocd/application.yml
+}
+
+function k3d_basic() {
+    # create local registry
+    k3d_local_registry
     
+    # create cluster
+    k3d cluster create $cluster_name \
+    -p 80:80@loadbalancer \
+    -p 443:443@loadbalancer \
+    --k3s-server-arg "--no-deploy=traefik" \
+    --k3s-server-arg "--no-deploy=metrics-server" \
+    --registry-use k3d-registry.localhost:5000 \
+    --wait
 }
 
-function install_keycloak() {
-    # install postgresql and keycloak
-    kubectl create namespace keycloak
-    kubectl apply -n keycloak -f apps/keycloak/postgres/postgres.yml
-    kubectl rollout status sts/keycloak-postgresql -n keycloak
-    kubectl apply -n keycloak -f apps/keycloak/keycloak.yml
-    kubectl rollout status -n keycloak sts/keycloak
+function k3d_local_registry() {
+    k3d registry create registry.localhost --port 5000
 }
 
-function delete () {
-    kind delete cluster || true
-    docker rm -f kind-registry || true
+function k3d_install() {
+    k3d_basic
+    k3d_install_ingress
+    #install_argocd
+}
+
+function k3d_delete() {
+    k3d cluster delete $cluster_name || true
+    k3d registry delete registry.localhost || true
+}
+
+function k3d_install_ingress() {
+    helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+    helm repo update
+    helm install ingress-nginx ingress-nginx/ingress-nginx
 }
 
 CMD=$1
 
 case $CMD in
-    basic)
-        basic
+    kind-basic)
+        kind_basic
         ;;
-    install-ingress)
+    kind-install)
+        kind_install
+        ;;
+    kind-delete)
+        kind_delete
+        ;;
+    k3d-basic)
+        k3d_basic
+        ;;
+    k3d-install)
+        k3d_install
+        ;;
+    k3d-delete)
+        k3d_delete
+        ;;
+    kind-install-ingress)
         install_ingress
         ;;
-    install)
-        install
+    k3d-install-ingress)
+        k3d_install_ingress
         ;;
-    delete)
-        delete
+    install-argocd)
+        install_argocd
         ;;
     *)
         echo "Options are to basic, install-ingress, install and delete only."
