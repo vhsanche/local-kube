@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: weave
-  namespace: dev
+  namespace: weave
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   annotations:

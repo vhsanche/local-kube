@@ -134,9 +134,10 @@ function k3d_delete() {
 }
 
 function k3d_install_ingress() {
+    kubectl create namespace ingress-nginx
     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
     helm repo update
-    helm install ingress-nginx ingress-nginx/ingress-nginx
+    helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx
 }
 
 CMD=$1

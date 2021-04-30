@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: keycloak-postgresql
-  namespace: dev
+  namespace: keycloak
   finalizers:
   - resources-finalizer.argocd.argoproj.io
   annotations:
