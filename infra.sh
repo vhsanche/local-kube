@@ -125,7 +125,7 @@ function k3d_local_registry() {
 function k3d_install() {
     k3d_basic
     k3d_install_ingress
-    #install_argocd
+    install_argocd
 }
 
 function k3d_delete() {
@@ -138,6 +138,9 @@ function k3d_install_ingress() {
     helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
     helm repo update
     helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx
+    kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx
+    sleep 15s
+
 }
 
 CMD=$1
