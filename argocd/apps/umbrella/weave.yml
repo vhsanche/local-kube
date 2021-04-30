@@ -13,7 +13,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: apps/weave-scope/dev
+    path: argocd/apps/weave-scope/dev
     repoURL: https://github.com/vhsanche/kube.git
     targetRevision: HEAD
   syncPolicy:

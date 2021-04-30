@@ -13,7 +13,7 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: apps/keycloak/dev
+    path: argocd/apps/keycloak/dev
     repoURL: https://github.com/vhsanche/kube.git
     targetRevision: HEAD
   syncPolicy:
