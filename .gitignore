@@ -1,1 +1,8 @@
 .DS_Store
+terraform.tfvars
+.iron-bank-creds*
+*.tfvars
+.terraform*
+terraform.tfvars
+terraform.tfstate*
+crash.log

@@ -63,3 +63,44 @@ helm repo add codecentric https://codecentric.github.io/helm-charts
 helm repo add stable https://charts.helm.sh/stable
 helm repo update
 ```
+
+Big Bang
+=======
+What you need:
+- [Docker](https://docs.docker.com/get-started/)
+- [k3d](https://github.com/rancher/k3d)
+- [Terraform](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+
+Nice to haves:
+- [Kubectl](https://kubernetes.io/docs/tasks/tools/) - _CLI for working with k8s/k3d_
+- [K8s Lens](https://k8slens.dev/) - _Handy GUI for kubectl_
+
+# Instructions
+
+### Create the file `terraform.tfvars` and fill out below.   You will need to get your [Registry1](http://registry1.dso.mil/) CLI secret from the user profile screen.
+
+```bash
+registry1_username="REPLACE_ME"
+registry1_password="REPLACE_ME"
+```
+
+### Deploy Big Bang onto the new cluster
+
+```bash
+
+# Initialize & apply terraform (type yes at prompt)
+terraform init
+terraform apply 
+
+# Watch the deployments
+watch kubectl get kustomizations,hr,po -A
+
+# Get a list of http endpoints
+kubectl get vs -A
+```
+
+### Teardown
+
+```bash
+# Big bang teardown (optional, takes several minutes & just reverts back to an empty cluster)
+terraform destroy

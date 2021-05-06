@@ -1,0 +1,21 @@
+bases:
+  - git::https://repo1.dso.mil/platform-one/big-bang/umbrella.git/base?ref=temporary-branch-pending-release
+
+configMapGenerator:
+  - name: common
+    namespace: bigbang
+    behavior: merge
+    files:
+      - values.yaml
+
+patchesStrategicMerge:
+- |-
+  apiVersion: source.toolkit.fluxcd.io/v1beta1
+  kind: GitRepository
+  metadata:
+    name: bigbang
+    namespace: bigbang
+  spec:
+    ref:
+      $patch: replace
+      semver: "1.5.0"
