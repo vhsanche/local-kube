@@ -5,17 +5,3 @@ metadata:
   name: keycloak
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: keycloak-postgresql
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: weave
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
