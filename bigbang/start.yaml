@@ -12,7 +12,7 @@ metadata:
   namespace: bigbang
 spec:
   interval: 1m
-  url: https://github.com/vhsanche/kube.git
+  url: https://github.com/vhsanche/kube
   ref:
     branch: master
 
