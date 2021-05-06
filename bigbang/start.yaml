@@ -12,7 +12,7 @@ metadata:
   namespace: bigbang
 spec:
   interval: 1m
-  url: https://gitlab.com/vhsanche8/my-test-bb.git
+  url: https://github.com/vhsanche/kube.git
   ref:
     branch: master
 

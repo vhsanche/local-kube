@@ -140,7 +140,11 @@ function k3d_install_ingress() {
     helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx
     kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx
     sleep 15s
+}
 
+function install_big_bang() {
+    terraform init
+    terraform apply
 }
 
 CMD=$1
@@ -172,6 +176,9 @@ case $CMD in
         ;;
     install-argocd)
         install_argocd
+        ;;
+    install-bing-bang)
+        install_big_bang
         ;;
     *)
         echo "Options are to basic, install-ingress, install and delete only."
