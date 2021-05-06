@@ -144,7 +144,11 @@ function k3d_install_ingress() {
 
 function install_big_bang() {
     terraform init
-    terraform apply
+    terraform apply -auto-approve
+}
+
+function delete_big_bang() {
+    terraform destroy -auto-approve
 }
 
 CMD=$1
@@ -177,7 +181,7 @@ case $CMD in
     install-argocd)
         install_argocd
         ;;
-    install-bing-bang)
+    install-big-bang)
         install_big_bang
         ;;
     *)
