@@ -185,6 +185,9 @@ case $CMD in
     install-big-bang)
         install_big_bang
         ;;
+    delete-big-bang)
+        delete_big_bang
+        ;;
     *)
         echo "Options are to basic, install-ingress, install and delete only."
         ;;

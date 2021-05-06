@@ -6,6 +6,9 @@ flux:
   rollback:
     cleanupOnFail: false
 
+monitoring:
+  enabled: false
+
 logging:
   enabled: false
   # Directly modify chart values for dev workloads
@@ -49,6 +52,9 @@ gatekeeper:
   values:
     replicas: 1
 
+clusterAuditor:
+  enabled: false
+  
 twistlock:
   enabled: false
   # Directly modify chart values for dev workloads
