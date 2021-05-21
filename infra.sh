@@ -101,7 +101,7 @@ function install_argocd() {
     kubectl patch secret -n argocd argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
 
     # configure app for apps
-    kubectl apply -f argocd/application.yml
+    #kubectl apply -f argocd/application.yml
 }
 
 function k3d_basic() {
@@ -174,7 +174,7 @@ case $CMD in
         k3d_delete
         ;;
     kind-install-ingress)
-        install_ingress
+        kind_install_ingress
         ;;
     k3d-install-ingress)
         k3d_install_ingress

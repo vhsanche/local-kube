@@ -93,7 +93,7 @@ terraform init
 terraform apply 
 
 # Watch the deployments
-watch kubectl get kustomizations,hr,po -A
+watch kubectl get gitrepositories,kustomizations,hr,po -A
 
 # Get a list of http endpoints
 kubectl get vs -A
