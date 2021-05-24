@@ -20,12 +20,10 @@ metadata:
   name: sonarqube-sonarqube-config
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
 data:
-  sonar.properties: |
-    sonar.forceAuthentication=true
 ---
 # Source: sonarqube/templates/init-sysctl.yaml
 apiVersion: v1
@@ -34,7 +32,7 @@ metadata:
   name: sonarqube-sonarqube-init-sysctl
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
 data:
@@ -65,7 +63,7 @@ metadata:
   name: sonarqube-sonarqube-install-plugins
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
 data:
@@ -78,7 +76,7 @@ metadata:
   name: sonarqube-sonarqube-postgres-config
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
 data:
@@ -92,7 +90,7 @@ metadata:
   name: sonarqube-sonarqube-tests
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
 data:
@@ -108,7 +106,7 @@ metadata:
   name: sonarqube-sonarqube
   labels:
     app: sonarqube
-    chart: "sonarqube-9.6.0"
+    chart: "sonarqube-9.6.3"
     release: "sonarqube"
     heritage: "Helm"
 
@@ -168,7 +166,7 @@ metadata:
   name: sonarqube-sonarqube
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
 
@@ -190,7 +188,7 @@ metadata:
   name: sonarqube-sonarqube
   labels:
     app: sonarqube
-    chart: sonarqube-9.6.0
+    chart: sonarqube-9.6.3
     release: sonarqube
     heritage: Helm
     app.kubernetes.io/name: sonarqube-sonarqube-sonarqube
@@ -211,9 +209,9 @@ spec:
         app: sonarqube
         release: sonarqube
       annotations:
-        checksum/init-sysctl: 93158843f26cce4b2778f36415df6902566165ae6eda3b25a4fe1775484cec90
-        checksum/plugins: b779305e08abac5eaf5bece126c0be384f83657803e59cd2f14f749245174775
-        checksum/config: 3fbbf2544c17c1b20b54762a85a233d1ba48dd851efb94892be381826e38fe45
+        checksum/init-sysctl: 5cbf70650a3062a7e68e2afb93e3f79df9d8ce4000e3de23eae989dfc6a0a3f7
+        checksum/plugins: f10fbc41c9ac5736c2ca031719d4d62d7d092e43292831b045885a6ac8740639
+        checksum/config: 83edd31235ee24f56494d1d988f304032a6ae544135af0761f897f2cfa6b396a
         checksum/secret: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     spec:
       securityContext:
@@ -290,12 +288,6 @@ spec:
           resources:
             {}
       volumes:
-      - name: sonarqube-config
-        configMap:
-          name: sonarqube-sonarqube-config
-          items:
-            - key: sonar.properties
-              path: ./conf/sonar.properties
       - name: init-sysctl
         configMap:
           name: sonarqube-sonarqube-init-sysctl
@@ -358,8 +350,8 @@ spec:
           imagePullPolicy: "IfNotPresent"
           resources:
             limits:
-              cpu: 1
-              memory: 1Gi
+              cpu: 2
+              memory: 2Gi
             requests:
               cpu: 100m
               memory: 200Mi
@@ -432,7 +424,55 @@ spec:
           - "ReadWriteOnce"
         resources:
           requests:
-            storage: "3Gi"
+            storage: "20Gi"
+---
+# Source: sonarqube/templates/tests/sonarqube-test.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "sonarqube-ui-test"
+  annotations:
+    "helm.sh/hook": test-success
+  labels:
+    app: sonarqube
+    chart: sonarqube-9.6.3
+    release: sonarqube
+    heritage: Helm
+spec:
+  initContainers:
+    - name: "bats"
+      image: "bats/bats:1.2.1"
+      imagePullPolicy: IfNotPresent
+      command: ["bash", "-c"]
+      args:
+        - |-
+          set -ex
+          cp -R /opt/bats /tools/bats/
+      volumeMounts:
+        - mountPath: /tools
+          name: tools
+  containers:
+    - name: sonarqube-ui-test
+      image: bitnami/minideb-extras
+      imagePullPolicy: IfNotPresent
+      command: [
+        "/tools/bats/bin/bats",
+        "--tap",
+        "/tests/run.sh"]
+      volumeMounts:
+      - mountPath: /tests
+        name: tests
+        readOnly: true
+      - mountPath: /tools
+        name: tools
+  volumes:
+  - name: tests
+    configMap:
+      name: sonarqube-sonarqube-tests
+  - name: tools
+    emptyDir: 
+      {}
+  restartPolicy: Never
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
