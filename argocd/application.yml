@@ -13,7 +13,7 @@ spec:
   source:
     path: argocd/apps/umbrella
     repoURL: https://github.com/vhsanche/kube.git
-    targetRevision: HEAD
+    targetRevision: dev-ppadron
     directory:
       recurse: true
       jsonnet: {}
