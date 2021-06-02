@@ -14,7 +14,7 @@ spec:
   interval: 1m
   url: https://github.com/vhsanche/kube
   ref:
-    branch: master
+    branch: dev-ppadron
 
 ---
 
