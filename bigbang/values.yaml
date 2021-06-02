@@ -1,126 +1,429 @@
 hostname: bigbang.dev
 
-# Tune flux for dev
 flux:
   interval: 1m
   rollback:
     cleanupOnFail: false
 
-monitoring:
-  enabled: false
-
 logging:
   enabled: false
-  # Directly modify chart values for dev workloads
   values:
     elasticsearch:
       master:
         count: 1
-        resources:
-          limits:
-            cpu: 1
-            memory: 3Gi
-      data:
-        count: 1
         persistence:
-          storageClassName: ""
           size: 5Gi
         resources:
-          limits:
-            cpu: 1
-            memory: 3Gi
+          requests:
+            cpu: .5
+          limits: {}
+      data:
+        count: 2
+        persistence:
+          size: 5Gi
+        resources:
+          requests:
+            cpu: .5
+          limits: {}
+    kibana:
+      count: 1
+
+fluentbit:
+  enabled: false
+  values:
+    securityContext:
+      privileged: true
 
 istio:
   enabled: true
-  # Directly modify chart values for dev workloads
   values:
     kiali:
       dashboard:
         auth:
-          strategy: "anonymous"   
-    ingressGateway:
-      maxReplicas: 1
-      serviceAnnotations:
-        # Ensure mission apps have internal load balancer only
-        service.beta.kubernetes.io/aws-load-balancer-internal: "true"
-        # Enable cross zone load balancing
-        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-
-gatekeeper:
-  enabled: false
-  # Directly modify chart values for dev workloads
-  values:
-    replicas: 1
+          strategy: "anonymous"
 
 clusterAuditor:
   enabled: false
-  
+  values:
+    resources:
+      requests:
+        cpu: 100m
+        memory: .5Gi
+      limits: {}
+
+monitoring:
+  enabled: false
+  values:
+    alertmanager:
+      alertmanagerSpec:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+    prometheusOperator:
+      resources:
+        requests:
+          cpu: 250m
+          memory: 400Mi
+        limits: {}
+    prometheus:
+      prometheusSpec:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+    grafana:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits: {}
+    kubeStateMetrics:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 32Mi
+        limits: {}
+    nodeExporter:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 30Mi
+        limits: {}
+
+gatekeeper:
+  enabled: false
+  values:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits: {}
+
 twistlock:
   enabled: false
-  # Directly modify chart values for dev workloads
   values:
     console:
       persistence:
         size: 5Gi
 
+# Explicitly enable all addons for CI
 addons:
+  argocd:
+    enabled: false
+    values:
+      controller:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      dex:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      redis:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      server:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      repoServer:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+
+  authservice:
+    enabled: false
+    chains:
+      minimal:
+        callback_uri: "https://minimal.bigbang.dev"
+    values:
+      resources:
+        requests:
+          cpu: 100m
+          memory: 100Mi
+        limits: {}
+
   gitlab:
-      enabled: true
-      sso:
-        enabled: false
-      values:
-        global:
-          rails:
-            bootstrap:
-              enabled: false
-          edition: ce
-        gitlab-runner:
-          resources:
-            requests:
-              cpu: 10m
-            limits: {}
-        gitlab:
-          webservice:
-            minReplicas: 1
-            maxReplicas: 1
-          sidekiq:
-            minReplicas: 1
-            maxReplicas: 1
-          gitlab-shell:
-            minReplicas: 1
-            maxReplicas: 1
-          gitaly:
-            resources:
-              requests:
-                cpu: 50m
-              limits: {}
-          shared-secrets:
-            resources:
-              requests:
-                cpu: 10m
-              limits: {}
-          migrations:
-            resources:
-              requests:
-                cpu: 10m
-              limits: {}
-          task-runner:
-            resources:
-              requests:
-                cpu: 10m
-              limits: {}
-        registry:
-          hpa:
-            minReplicas: 1
-            maxReplicas: 1
-        postgresql:
-          metrics:
-            resources:
-              requests:
-                cpu: 10m
-              limits: {}
-        minio:
+    enabled: false
+    sso:
+      enabled: false
+    values:
+      global:
+        rails:
+          bootstrap:
+            enabled: false
+      gitlab-runner:
+        resources:
+          requests:
+            cpu: 10m
+          limits: {}
+      gitlab:
+        webservice:
+          minReplicas: 1
+          maxReplicas: 1
+        sidekiq:
+          minReplicas: 1
+          maxReplicas: 1
+        gitlab-shell:
+          minReplicas: 1
+          maxReplicas: 1
+        gitaly:
           resources:
             requests:
               cpu: 50m
             limits: {}
+        shared-secrets:
+          resources:
+            requests:
+              cpu: 10m
+            limits: {}
+        migrations:
+          resources:
+            requests:
+              cpu: 10m
+            limits: {}
+        task-runner:
+          resources:
+            requests:
+              cpu: 10m
+            limits: {}
+      registry:
+        hpa:
+          minReplicas: 1
+          maxReplicas: 1
+      postgresql:
+        metrics:
+          resources:
+            requests:
+              cpu: 10m
+            limits: {}
+      minio:
+        resources:
+          requests:
+            cpu: 50m
+          limits: {}
+
+  gitlabRunner:
+    enabled: false
+    values:
+      resources:
+        requests:
+          memory: 64Mi
+          cpu: 50m
+        limits: {}
+
+  anchore:
+    enabled: false
+    values:
+      postgresql:
+        persistence:
+          size: 20Gi
+      anchoreAnalyzer:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreApi:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreCatalog:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchorePolicyEngine:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreSimpleQueue:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreEnterpriseFeeds:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreEnterpriseRbac:
+        authResource:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits: {}
+        managerResources:
+          resources:
+            requests:
+              cpu: 100m
+              memory: 200Mi
+            limits: {}
+      anchoreEnterpriseReports:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreEnterpriseNotifications:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      anchoreEntperpiseUi:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+
+  sonarqube:
+    enabled: false
+    values:
+      plugins:
+        install: []
+      resources:
+        requests:
+          cpu: 100m
+          memory: 200Mi
+        limits: {}
+      persistence:
+        enabled: false
+        size: 5Gi
+      postgresql:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits: {}
+      tests:
+        enabled: false
+
+  minioOperator:
+    enabled: false
+
+  minio:
+    enabled: false
+    values:
+      zones:
+        servers: 1
+      volumesPerServer: 1
+
+  mattermostoperator:
+    enabled: false
+
+  mattermost:
+    enabled: false
+    elasticsearch:
+      enabled: true
+    values:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: 100m
+          memory: 128Mi
+        limits: {}
+      minio:
+        zones:
+          servers: 1
+        volumesPerServer: 1
+
+  nexus:
+    enabled: false
+    values:
+      persistence:
+        storageSize: 3Gi
+      nexus:
+      # https://help.sonatype.com/repomanager3/installation/system-requirements#SystemRequirements-JVMDirectMemory
+        env:
+          - name: install4jAddVmParams
+            value: "-Xms500M -Xmx500M -XX:MaxDirectMemorySize=500M -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 1500Mi
+
+  velero:
+    enabled: false
+    values:
+      installCRDs: true
+
+      # Set provider name and backup storage location bucket name
+      configuration:
+        provider: aws
+        # TODO: Bucket for this
+        backupStorageLocation:
+          bucket: bigbang-dogfood-velero
+          prefix: ci
+      #    config:
+      #      region: us-west-1
+      #      profile: test
+      #  volumeSnapshotLocation:
+      #    provider: aws
+      #    config:
+      #      bucket: velero
+      #      region: us-west-1
+
+      # Default to AWS Plugin, update to others as they are supported
+      plugins:
+        - aws
+
+      #schedules:
+      #  mybackup:
+      #    labels:
+      #      myenv: foo
+      #    schedule: "0 0 * * *"
+      #    template:
+      #      ttl: "240h"
+      #      includedNamespaces:
+      #        - foo
+
+      # Set a service account so that the CRD clean up job has proper permissions to delete CRDs
+      serviceAccount:
+        server:
+          name: velero
+
+      # Whether or not to clean up CustomResourceDefintions when deleting a release.
+      # Cleaning up CRDs will delete the BackupStorageLocation and VolumeSnapshotLocation instances, which would have to be reconfigured.
+      # Backup data in object storage will _not_ be deleted, however Backup instances in the Kubernetes API will.
+      # Always clean up CRDs in CI.
+      cleanUpCRDs: true
+
+  keycloak:
+    enabled: false
+    values:
+      replicas: 1
+      resources:
+        requests:
+          cpu: 10m
+          memory: 16Mi
+        limits: {}
