@@ -29,7 +29,7 @@ logging:
       count: 1
 
 fluentbit:
-  enabled: true
+  enabled: false
   values:
     securityContext:
       privileged: true
@@ -43,7 +43,7 @@ istio:
           strategy: "anonymous"
 
 clusterAuditor:
-  enabled: true
+  enabled: false
   values:
     resources:
       requests:
@@ -52,7 +52,7 @@ clusterAuditor:
       limits: {}
 
 monitoring:
-  enabled: true
+  enabled: false
   values:
     alertmanager:
       alertmanagerSpec:
@@ -94,7 +94,7 @@ monitoring:
         limits: {}
 
 gatekeeper:
-  enabled: true
+  enabled: false
   values:
     replicas: 1
     resources:
@@ -104,7 +104,7 @@ gatekeeper:
       limits: {}
 
 twistlock:
-  enabled: true
+  enabled: false
   values:
     console:
       persistence:
