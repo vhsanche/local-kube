@@ -1,5 +1,5 @@
 bases:
-  - git::https://repo1.dso.mil/platform-one/big-bang/umbrella.git/base?ref=1.8.0
+  - git::https://repo1.dso.mil/platform-one/big-bang/umbrella.git/base?ref=1.9.1
 
 configMapGenerator:
   - name: common
@@ -18,4 +18,4 @@ patchesStrategicMerge:
   spec:
     ref:
       $patch: replace
-      semver: "1.8.0"
+      semver: "1.9.1"
