@@ -143,7 +143,6 @@ function k3d_install_ingress() {
 }
 
 function install_big_bang() {
-    kubectl create namespace bigbang
     terraform init
     terraform apply -auto-approve
 }
