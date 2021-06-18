@@ -112,8 +112,8 @@ function k3d_basic() {
     k3d cluster create $cluster_name \
     -p 80:80@loadbalancer \
     -p 443:443@loadbalancer \
+    --volume /etc/machine-id:/etc/machine-id \
     --k3s-server-arg "--no-deploy=traefik" \
-    --k3s-server-arg "--no-deploy=metrics-server" \
     --registry-use k3d-registry.localhost:5000 \
     --wait
 }
