@@ -329,10 +329,10 @@ addons:
         enabled: false
 
   minioOperator:
-    enabled: false
+    enabled: true
 
   minio:
-    enabled: false
+    enabled: true
     values:
       zones:
         servers: 1
