@@ -12,12 +12,11 @@ metadata:
   namespace: bigbang
 spec:
   interval: 1m
-  url: https://repo1.dso.mil/platform-one/hello-world/big-bang-universe.git
+  url: https://github.com/vhsanche/kube
   ref:
     branch: master
 
 ---
-
 apiVersion: kustomize.toolkit.fluxcd.io/v1beta1
 kind: Kustomization
 metadata:
