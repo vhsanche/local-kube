@@ -65,7 +65,7 @@ clusterAuditor:
       limits: {}
 
 monitoring:
-  enabled: true
+  enabled: false
   values:
     alertmanager:
       alertmanagerSpec:
