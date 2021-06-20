@@ -40,6 +40,8 @@ fluentbit:
 istio:
   # Directly modify chart values for dev workloads
   values:
+    jaeger:
+      enabled: false
     kiali:
       dashboard:
         auth:
@@ -63,7 +65,7 @@ clusterAuditor:
       limits: {}
 
 monitoring:
-  enabled: false
+  enabled: true
   values:
     alertmanager:
       alertmanagerSpec:
