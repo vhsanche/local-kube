@@ -5,6 +5,9 @@ flux:
   rollback:
     cleanupOnFail: false
 
+eckoperator:
+  enabled: false
+
 logging:
   enabled: false
   values:
