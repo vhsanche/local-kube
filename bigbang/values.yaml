@@ -38,10 +38,10 @@ fluentbit:
       privileged: true
 
 istio:
+  jaeger:
+    enabled: false
   # Directly modify chart values for dev workloads
   values:
-    jaeger:
-      enabled: false
     kiali:
       dashboard:
         auth:
