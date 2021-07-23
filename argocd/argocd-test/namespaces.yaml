@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: victor-dev
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: victor-staging
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"

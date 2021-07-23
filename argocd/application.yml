@@ -11,9 +11,9 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: argocd/apps/umbrella
     repoURL: https://github.com/vhsanche/kube.git
-    targetRevision: HEAD
+    path: argocd/argocd-test
+    targetRevision: staging
     directory:
       recurse: true
       jsonnet: {}
