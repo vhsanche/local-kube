@@ -2,7 +2,7 @@
 terraform.tfvars
 .iron-bank-creds*
 *.tfvars
-.terraform*
 terraform.tfvars
 terraform.tfstate*
 crash.log
+.terraform.lock.hcl
