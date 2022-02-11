@@ -173,7 +173,7 @@ addons:
         limits: {}
 
   gitlab:
-    enabled: false
+    enabled: true
     sso:
       enabled: false
     values:
@@ -233,7 +233,7 @@ addons:
           limits: {}
 
   gitlabRunner:
-    enabled: false
+    enabled: true
     values:
       resources:
         requests:
