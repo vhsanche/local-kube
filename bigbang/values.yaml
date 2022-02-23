@@ -343,10 +343,10 @@ addons:
         enabled: false
 
   minioOperator:
-    enabled: true
+    enabled: false
 
   minio:
-    enabled: true
+    enabled: false
     values:
       zones:
         servers: 1
