@@ -106,15 +106,12 @@ function install_argocd() {
 
 function k3d_basic() {
     # create local registry
-    k3d_local_registry
-    IMAGE_CACHE=${HOME}/.big-bang-cache
-    mkdir -p ${IMAGE_CACHE}
+    # k3d_local_registry
+    # IMAGE_CACHE=${HOME}/.big-bang-cache
+    # mkdir -p ${IMAGE_CACHE}
 
     # Create the cluster
     k3d cluster create $cluster_name \
-    --volume ${IMAGE_CACHE}:/var/lib/rancher/k3s/agent/containerd/io.containerd.content.v1.content \
-    --volume /etc/machine-id:/etc/machine-id \
-    --registry-use k3d-registry.localhost:5000 \
     --k3s-arg "--disable=traefik@server:0" \
     -p 80:80@loadbalancer \
     -p 443:443@loadbalancer \

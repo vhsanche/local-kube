@@ -40,6 +40,9 @@ fluentbit:
 jaeger:
   enabled: false
 
+kiali:
+  enabled: false
+
 istio:
   # Directly modify chart values for dev workloads
   values:
