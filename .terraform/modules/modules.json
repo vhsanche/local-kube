@@ -1,1 +1,1 @@
-{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"big_bang","Source":"git::https://repo1.dso.mil/platform-one/big-bang/terraform-modules/big-bang-terraform-launcher.git?ref=v0.1.2","Dir":".terraform/modules/big_bang"}]}
+{"Modules":[{"Key":"big_bang","Source":"git::https://repo1.dso.mil/platform-one/big-bang/terraform-modules/big-bang-terraform-launcher.git","Dir":".terraform/modules/big_bang"},{"Key":"","Source":"","Dir":"."}]}
