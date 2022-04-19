@@ -417,12 +417,13 @@ spec:
         name: keycloak-test
   restartPolicy: Never
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: keycloak-ingress
   annotations:
     ingress.kubernetes.io/rewrite-target: /
+    kubernetes.io/ingress.class: nginx
 spec:
   tls:
   - hosts:
@@ -432,10 +433,16 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: keycloak-http
-          servicePort: 80
+          service:
+            name: keycloak-http
+            port: 
+              number: 80
       - path: /auth
+        pathType: Prefix
         backend:
-          serviceName: keycloak-http
-          servicePort: 80
+          service:
+            name: keycloak-http
+            port:
+              number: 80
