@@ -90,6 +90,7 @@ function kind_install_ingress() {
 function install_argocd() {
     # install argocd
     kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     kubectl apply -k argocd/apps/argocd/dev
 
     # wait for argocd
