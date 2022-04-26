@@ -126,14 +126,6 @@ function k3d_install() {
     k3d_install_ingress
 }
 
-function install_argo_rollouts() {
-    k3d_basic
-    k3d_install_ingress
-
-    kubectl create namespace argo-rollouts
-    kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
-}
-
 function k3d_delete() {
     k3d cluster delete $cluster_name || true
     k3d registry delete k3d-registry.localhost || true
