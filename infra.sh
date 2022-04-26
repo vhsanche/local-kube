@@ -183,10 +183,11 @@ case $CMD in
         kubectl apply -f argocd/application.yml
         ;;
     install-argo-rollouts)
-        install_argocd
-
+        k3d_install
         # configure for apps
-        kubectl apply -f argocd/application-rollouts.yml
+        
+        kubectl create namespace argo-rollouts
+        kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
         ;;
     install-big-bang)
         install_big_bang
