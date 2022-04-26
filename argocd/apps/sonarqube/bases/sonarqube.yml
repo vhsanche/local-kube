@@ -171,27 +171,7 @@ metadata:
     chart: sonarqube-9.6.0
     release: sonarqube
     heritage: Helm
-spec:
-  type: ClusterIP
-  ports:
-    - port: 9000
-      targetPort: http
-      protocol: TCP
-      name: http
-  selector:
-    app: sonarqube
-    release: sonarqube
----
-# Source: sonarqube/templates/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: sonarqube-sonarqube-preview
-  labels:
-    app: sonarqube
-    chart: sonarqube-9.6.0
-    release: sonarqube
-    heritage: Helm
+
 spec:
   type: ClusterIP
   ports:
@@ -204,8 +184,8 @@ spec:
     release: sonarqube
 ---
 # Source: sonarqube/templates/deployment.yaml
-apiVersion: argoproj.io/v1alpha1
-kind: Rollout
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: sonarqube-sonarqube
   labels:
@@ -220,7 +200,7 @@ metadata:
     app.kubernetes.io/component: sonarqube-sonarqube
     app.kubernetes.io/version: "8.5.1-community"
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: sonarqube
@@ -309,11 +289,6 @@ spec:
               name: tmp-dir
           resources:
             {}
-      strategy:
-        blueGreen:
-          autoPromotionEnabled: false
-          activeService: sonarqube-sonarqube
-          previewService: sonarqube-sonarqube-preview
       volumes:
       - name: sonarqube-config
         configMap:
@@ -479,28 +454,5 @@ spec:
         backend:
           service:
             name: sonarqube-sonarqube
-            port: 
-              number: 9000
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: sonarqube-ingress-preview
-  annotations:
-    ingress.kubernetes.io/rewrite-target: /
-    kubernetes.io/ingress.class: nginx
-spec:
-  tls:
-  - hosts:
-    - sonarqube-preview.test-test.com
-  rules:
-  - host: sonarqube-preview.test-test.com
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: sonarqube-sonarqube-preview
             port: 
               number: 9000
