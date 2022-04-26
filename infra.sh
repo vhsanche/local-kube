@@ -88,28 +88,26 @@ function kind_install_ingress() {
 }
 
 function install_argocd() {
+    k3d_basic
+    k3d_install_ingress
+
     # install argocd
     kubectl create namespace argocd
     kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
     kubectl apply -k argocd/apps/argocd/dev
 
     # wait for argocd
-    kubectl rollout status deployment argocd-application-controller -n argocd
+    kubectl rollout status deployment argocd-applicationset-controller -n argocd
     kubectl rollout status deployment argocd-dex-server -n argocd
     kubectl rollout status deployment argocd-redis -n argocd 
     kubectl rollout status deployment argocd-repo-server -n argocd
     kubectl rollout status deployment argocd-server -n argocd
     kubectl patch secret -n argocd argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
-
-    # configure app for apps
-    kubectl apply -f argocd/application.yml
 }
 
 function k3d_basic() {
     # create local registry
-    # k3d_local_registry
-    # IMAGE_CACHE=${HOME}/.big-bang-cache
-    # mkdir -p ${IMAGE_CACHE}
+    k3d_local_registry
 
     # Create the cluster
     k3d cluster create $cluster_name \
@@ -126,7 +124,14 @@ function k3d_local_registry() {
 function k3d_install() {
     k3d_basic
     k3d_install_ingress
-    install_argocd
+}
+
+function install_argo_rollouts() {
+    k3d_basic
+    k3d_install_ingress
+
+    kubectl create namespace argo-rollouts
+    kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
 }
 
 function k3d_delete() {
@@ -140,7 +145,7 @@ function k3d_install_ingress() {
     helm repo update
     helm install ingress-nginx ingress-nginx/ingress-nginx --namespace ingress-nginx
     kubectl rollout status deployment ingress-nginx-controller -n ingress-nginx
-    sleep 15s
+    kubectl rollout status daemonset svclb-ingress-nginx-controller -n ingress-nginx
 }
 
 function install_big_bang() {
@@ -181,6 +186,15 @@ case $CMD in
         ;;
     install-argocd)
         install_argocd
+        
+        # configure for apps
+        kubectl apply -f argocd/application.yml
+        ;;
+    install-argo-rollouts)
+        install_argocd
+
+        # configure for apps
+        kubectl apply -f argocd/application-rollouts.yml
         ;;
     install-big-bang)
         install_big_bang
