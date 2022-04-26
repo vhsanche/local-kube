@@ -28,8 +28,8 @@ spec:
     app: keycloak
   type: ClusterIP
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: keycloak
   labels:
@@ -46,7 +46,7 @@ spec:
     spec:
       containers:
       - name: keycloak
-        image: quay.io/keycloak/keycloak:17.0
+        image: quay.io/keycloak/keycloak:18.0
         args: ["start-dev"]
         env:
         - name: KEYCLOAK_ADMIN
@@ -58,6 +58,11 @@ spec:
         ports:
         - name: http
           containerPort: 8080
+  strategy:
+    blueGreen:
+      autoPromotionEnabled: false
+      activeService: keycloak
+      previewService: keycloak-preview
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
