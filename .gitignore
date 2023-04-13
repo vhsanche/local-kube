@@ -1,9 +1,2 @@
 .DS_Store
-terraform.tfvars
-.iron-bank-creds*
-*.tfvars
-terraform.tfvars
-terraform.tfstate*
-crash.log
-.terraform.lock.hcl
-.terraform.tfstate.lock.info
+

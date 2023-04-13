@@ -1,0 +1,65 @@
+#!/bin/bash
+reg_name='kind-registry'
+reg_port='5000'
+cluster_name='local-kube'
+
+function install_argocd() {
+    # install argocd
+    kubectl create namespace argocd
+    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+    kubectl apply -k argocd/apps/argocd/dev
+
+    # wait for argocd
+    kubectl rollout status deployment argocd-applicationset-controller -n argocd
+    kubectl rollout status deployment argocd-dex-server -n argocd
+    kubectl rollout status deployment argocd-redis -n argocd 
+    kubectl rollout status deployment argocd-repo-server -n argocd
+    kubectl rollout status deployment argocd-server -n argocd
+    kubectl patch secret -n argocd argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
+}
+
+function k3d_local_registry() {
+    k3d registry create registry.localhost --port 5000
+}
+
+function k3d_install_ingress() {
+    kubectl create namespace nginx-ingress
+    helm repo add nginx-stable https://helm.nginx.com/stable
+    helm repo update
+    helm upgrade --install nginx-ingress nginx-stable/nginx-ingress -n nginx-ingress --atomic
+    kubectl rollout status deployment nginx-ingress-controller -n nginx-ingress
+}
+
+function k3d_install() {
+    # create local registry
+    k3d_local_registry
+
+    # Create the cluster
+    k3d cluster create $cluster_name \
+    --k3s-arg "--disable=traefik@server:0" \
+    -p 80:80@loadbalancer \
+    -p 443:443@loadbalancer \
+    --wait
+
+    # Install nginx ingress
+    k3d_install_ingress
+}
+
+function k3d_destroy() {
+    k3d cluster delete $cluster_name || true
+    k3d registry delete k3d-registry.localhost || true
+}
+
+CMD=$1
+
+case $CMD in
+    up)
+        k3d_install
+        ;;
+    down)
+        k3d_destroy
+        ;;
+    *)
+        echo "Options are to 'up' to instantiate or 'down' to destroy."
+        ;;
+esac
