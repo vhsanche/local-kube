@@ -3,21 +3,6 @@ reg_name='kind-registry'
 reg_port='5000'
 cluster_name='local-kube'
 
-function install_argocd() {
-    # install argocd
-    kubectl create namespace argocd
-    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-    kubectl apply -k argocd/apps/argocd/dev
-
-    # wait for argocd
-    kubectl rollout status deployment argocd-applicationset-controller -n argocd
-    kubectl rollout status deployment argocd-dex-server -n argocd
-    kubectl rollout status deployment argocd-redis -n argocd 
-    kubectl rollout status deployment argocd-repo-server -n argocd
-    kubectl rollout status deployment argocd-server -n argocd
-    kubectl patch secret -n argocd argocd-secret -p '{"stringData": { "admin.password": "'$(htpasswd -bnBC 10 "" testtest123! | tr -d ':\n')'"}}'
-}
-
 function k3d_local_registry() {
     k3d registry create registry.localhost --port 5000
 }
