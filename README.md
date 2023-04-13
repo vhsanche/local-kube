@@ -1,12 +1,5 @@
 
 # Pre-requesites
-To give Rancher Desktop/Docker enough computer resources do the following:
-```bash
-4 CPUs
-8 GB RAM
-1 GB Swap
-```
-
 # Install K3d 
 Follow the instructions below:
 ```bash
